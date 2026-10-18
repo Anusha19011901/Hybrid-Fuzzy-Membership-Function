@@ -403,8 +403,8 @@ by one of the inventors for educational and research purposes. It is not the ori
 code and not a product. Whatever license the code is released under covers the code only: **it
 does not grant any rights under the patent**, which remain with Vellore Institute of Technology.
 
-**License.** TODO: choose and add a `LICENSE` file (for example MIT or Apache-2.0 for the code,
-with the patent note above kept in the README).
+**License.** Code released under the MIT License. The license covers this code only and grants no
+rights under Indian Patent No. 601763, which is held by Vellore Institute of Technology.
 
 **Dataset.** Janosi, A., Steinbrunn, W., Pfisterer, M., and Detrano, R. (1989). *Heart Disease*.
 UCI Machine Learning Repository, https://archive.ics.uci.edu/dataset/45/heart+disease
