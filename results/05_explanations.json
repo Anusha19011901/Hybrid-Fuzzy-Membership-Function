@@ -1,0 +1,434 @@
+{
+  "complete": {
+    "meta": {
+      "id": 192,
+      "site": "Cleveland",
+      "true": "High",
+      "test_index": 11
+    },
+    "predicted": "High",
+    "risk_score": 0.549898553221695,
+    "combined_scores": {
+      "Low": 0.2541,
+      "Moderate": 0.3313,
+      "High": 0.4146
+    },
+    "n_attributes_used": 10,
+    "attributes": [
+      {
+        "attribute": "age",
+        "value": 51.0,
+        "missing": false,
+        "fired_terms": {
+          "Low": 0.160587997990194,
+          "Normal": 0.8571428571428571,
+          "High": 0.011477532624613238
+        },
+        "scores": {
+          "Low": 0.4744,
+          "Moderate": 0.3105,
+          "High": 0.2151
+        },
+        "weight": 0.0911872263064698,
+        "effective_weight": 0.0911872263064698,
+        "contribution": {
+          "Low": 0.0433,
+          "Moderate": 0.0283,
+          "High": 0.0196
+        }
+      },
+      {
+        "attribute": "trestbps",
+        "value": 140.0,
+        "missing": false,
+        "fired_terms": {
+          "Low": 0.0009815604591000046,
+          "Normal": 0.45454545454545453,
+          "High": 0.6729587231082617
+        },
+        "scores": {
+          "Low": 0.4297,
+          "Moderate": 0.2855,
+          "High": 0.2848
+        },
+        "weight": 0.0016127186130630313,
+        "effective_weight": 0.0016127186130630313,
+        "contribution": {
+          "Low": 0.0007,
+          "Moderate": 0.0005,
+          "High": 0.0005
+        }
+      },
+      {
+        "attribute": "thalch",
+        "value": 122.0,
+        "missing": false,
+        "fired_terms": {
+          "Low": 0.5333333333333333,
+          "Normal": 0.4666666666666667,
+          "High": 3.970317346487996e-05
+        },
+        "scores": {
+          "Low": 0.3318,
+          "Moderate": 0.3395,
+          "High": 0.3287
+        },
+        "weight": 0.09616042960224644,
+        "effective_weight": 0.09616042960224644,
+        "contribution": {
+          "Low": 0.0319,
+          "Moderate": 0.0326,
+          "High": 0.0316
+        }
+      },
+      {
+        "attribute": "oldpeak",
+        "value": 4.2,
+        "missing": false,
+        "fired_terms": {
+          "Low": 2.5756993106069683e-72,
+          "Normal": 1.6281043730292223e-19,
+          "High": 1.0
+        },
+        "scores": {
+          "Low": 0.2122,
+          "Moderate": 0.328,
+          "High": 0.4598
+        },
+        "weight": 0.12121656180517522,
+        "effective_weight": 0.12121656180517522,
+        "contribution": {
+          "Low": 0.0257,
+          "Moderate": 0.0398,
+          "High": 0.0557
+        }
+      },
+      {
+        "attribute": "ca",
+        "value": 3.0,
+        "missing": false,
+        "fired_terms": {
+          "3": 1.0
+        },
+        "scores": {
+          "Low": 0.2105,
+          "Moderate": 0.1579,
+          "High": 0.6316
+        },
+        "weight": 0.14338101109892393,
+        "effective_weight": 0.14338101109892393,
+        "contribution": {
+          "Low": 0.0302,
+          "Moderate": 0.0226,
+          "High": 0.0906
+        }
+      },
+      {
+        "attribute": "cp",
+        "value": "asymptomatic",
+        "missing": false,
+        "fired_terms": {
+          "asymptomatic": 1.0
+        },
+        "scores": {
+          "Low": 0.217,
+          "Moderate": 0.3865,
+          "High": 0.3965
+        },
+        "weight": 0.14400101822726052,
+        "effective_weight": 0.14400101822726052,
+        "contribution": {
+          "Low": 0.0312,
+          "Moderate": 0.0557,
+          "High": 0.0571
+        }
+      },
+      {
+        "attribute": "restecg",
+        "value": "normal",
+        "missing": false,
+        "fired_terms": {
+          "normal": 1.0
+        },
+        "scores": {
+          "Low": 0.4865,
+          "Moderate": 0.3063,
+          "High": 0.2072
+        },
+        "weight": 0.040514220606183156,
+        "effective_weight": 0.040514220606183156,
+        "contribution": {
+          "Low": 0.0197,
+          "Moderate": 0.0124,
+          "High": 0.0084
+        }
+      },
+      {
+        "attribute": "exang",
+        "value": "True",
+        "missing": false,
+        "fired_terms": {
+          "True": 1.0
+        },
+        "scores": {
+          "Low": 0.1691,
+          "Moderate": 0.4301,
+          "High": 0.4007
+        },
+        "weight": 0.10499687140301704,
+        "effective_weight": 0.10499687140301704,
+        "contribution": {
+          "Low": 0.0178,
+          "Moderate": 0.0452,
+          "High": 0.0421
+        }
+      },
+      {
+        "attribute": "slope",
+        "value": "flat",
+        "missing": false,
+        "fired_terms": {
+          "flat": 1.0
+        },
+        "scores": {
+          "Low": 0.2313,
+          "Moderate": 0.4057,
+          "High": 0.363
+        },
+        "weight": 0.13317474347347816,
+        "effective_weight": 0.13317474347347816,
+        "contribution": {
+          "Low": 0.0308,
+          "Moderate": 0.054,
+          "High": 0.0483
+        }
+      },
+      {
+        "attribute": "thal",
+        "value": "reversable defect",
+        "missing": false,
+        "fired_terms": {
+          "reversable defect": 1.0
+        },
+        "scores": {
+          "Low": 0.1847,
+          "Moderate": 0.3248,
+          "High": 0.4904
+        },
+        "weight": 0.1237551988641827,
+        "effective_weight": 0.1237551988641827,
+        "contribution": {
+          "Low": 0.0229,
+          "Moderate": 0.0402,
+          "High": 0.0607
+        }
+      }
+    ]
+  },
+  "missing": {
+    "meta": {
+      "id": 799,
+      "site": "VA Long Beach",
+      "true": "High",
+      "test_index": 14
+    },
+    "predicted": "High",
+    "risk_score": 0.5416491975552524,
+    "combined_scores": {
+      "Low": 0.2438,
+      "Moderate": 0.3681,
+      "High": 0.3881
+    },
+    "n_attributes_used": 8,
+    "attributes": [
+      {
+        "attribute": "age",
+        "value": 60.0,
+        "missing": false,
+        "fired_terms": {
+          "Low": 0.0006920654703697093,
+          "Normal": 0.2,
+          "High": 0.8
+        },
+        "scores": {
+          "Low": 0.3165,
+          "Moderate": 0.2779,
+          "High": 0.4056
+        },
+        "weight": 0.0911872263064698,
+        "effective_weight": 0.12442588588239477,
+        "contribution": {
+          "Low": 0.0394,
+          "Moderate": 0.0346,
+          "High": 0.0505
+        }
+      },
+      {
+        "attribute": "trestbps",
+        "value": 142.0,
+        "missing": false,
+        "fired_terms": {
+          "Low": 0.00031967289589662854,
+          "Normal": 0.2727272727272727,
+          "High": 0.7621563046890406
+        },
+        "scores": {
+          "Low": 0.4195,
+          "Moderate": 0.2924,
+          "High": 0.2881
+        },
+        "weight": 0.0016127186130630313,
+        "effective_weight": 0.0022005707404125466,
+        "contribution": {
+          "Low": 0.0009,
+          "Moderate": 0.0006,
+          "High": 0.0006
+        }
+      },
+      {
+        "attribute": "thalch",
+        "value": 110.0,
+        "missing": false,
+        "fired_terms": {
+          "Low": 1.0,
+          "Normal": 0.00362969561781445,
+          "High": 9.002207731724593e-08
+        },
+        "scores": {
+          "Low": 0.2486,
+          "Moderate": 0.3837,
+          "High": 0.3677
+        },
+        "weight": 0.09616042960224644,
+        "effective_weight": 0.1312118717141225,
+        "contribution": {
+          "Low": 0.0326,
+          "Moderate": 0.0503,
+          "High": 0.0482
+        }
+      },
+      {
+        "attribute": "oldpeak",
+        "value": 2.5,
+        "missing": false,
+        "fired_terms": {
+          "Low": 2.5973714435246015e-26,
+          "Normal": 7.442306024383855e-05,
+          "High": 1.0
+        },
+        "scores": {
+          "Low": 0.2122,
+          "Moderate": 0.328,
+          "High": 0.4598
+        },
+        "weight": 0.12121656180517522,
+        "effective_weight": 0.16540121568712382,
+        "contribution": {
+          "Low": 0.0351,
+          "Moderate": 0.0543,
+          "High": 0.0761
+        }
+      },
+      {
+        "attribute": "ca",
+        "value": null,
+        "missing": true,
+        "fired_terms": {},
+        "scores": null,
+        "weight": 0.14338101109892393,
+        "effective_weight": 0.0,
+        "contribution": null
+      },
+      {
+        "attribute": "cp",
+        "value": "asymptomatic",
+        "missing": false,
+        "fired_terms": {
+          "asymptomatic": 1.0
+        },
+        "scores": {
+          "Low": 0.217,
+          "Moderate": 0.3865,
+          "High": 0.3965
+        },
+        "weight": 0.14400101822726052,
+        "effective_weight": 0.19649083524785874,
+        "contribution": {
+          "Low": 0.0426,
+          "Moderate": 0.076,
+          "High": 0.0779
+        }
+      },
+      {
+        "attribute": "restecg",
+        "value": "normal",
+        "missing": false,
+        "fired_terms": {
+          "normal": 1.0
+        },
+        "scores": {
+          "Low": 0.4865,
+          "Moderate": 0.3063,
+          "High": 0.2072
+        },
+        "weight": 0.040514220606183156,
+        "effective_weight": 0.05528206080988613,
+        "contribution": {
+          "Low": 0.0269,
+          "Moderate": 0.0169,
+          "High": 0.0115
+        }
+      },
+      {
+        "attribute": "exang",
+        "value": "True",
+        "missing": false,
+        "fired_terms": {
+          "True": 1.0
+        },
+        "scores": {
+          "Low": 0.1691,
+          "Moderate": 0.4301,
+          "High": 0.4007
+        },
+        "weight": 0.10499687140301704,
+        "effective_weight": 0.14326928527568727,
+        "contribution": {
+          "Low": 0.0242,
+          "Moderate": 0.0616,
+          "High": 0.0574
+        }
+      },
+      {
+        "attribute": "slope",
+        "value": "flat",
+        "missing": false,
+        "fired_terms": {
+          "flat": 1.0
+        },
+        "scores": {
+          "Low": 0.2313,
+          "Moderate": 0.4057,
+          "High": 0.363
+        },
+        "weight": 0.13317474347347816,
+        "effective_weight": 0.18171827464251436,
+        "contribution": {
+          "Low": 0.042,
+          "Moderate": 0.0737,
+          "High": 0.066
+        }
+      },
+      {
+        "attribute": "thal",
+        "value": null,
+        "missing": true,
+        "fired_terms": {},
+        "scores": null,
+        "weight": 0.1237551988641827,
+        "effective_weight": 0.0,
+        "contribution": null
+      }
+    ]
+  }
+}

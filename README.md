@@ -30,7 +30,7 @@ handles the imprecision of clinical data while remaining readable by a clinician
 | 2 | Baselines: logistic regression, random forest, small MLP, majority-class floor | done |
 | 3 | Binary Brain Storm Optimization for feature selection | done |
 | 4 | Hybrid trapezoidal + Gaussian membership functions, data-derived | done |
-| 5 | Fuzzy inference: Wang–Mendel rules, weighted average, centroid | planned |
+| 5 | Fuzzy inference: per-attribute rules, weighted average, centroid | done |
 | 6 | Stratified CV evaluation vs. baselines, explainability plots | planned |
 
 ## Repository layout
@@ -41,7 +41,7 @@ figures/             all figures, numbered by phase
 notebooks/           one walkthrough notebook per phase
 results/             metric tables (CSV), numbered by phase
 scripts/             one runnable script per phase
-src/hfm/             the library: config, data, preprocess, models, evaluation, bbso, membership, plotting
+src/hfm/             the library: config, data, preprocess, models, evaluation, bbso, membership, fuzzy_model, plotting
 tests/               pytest suite
 ```
 
@@ -51,11 +51,12 @@ tests/               pytest suite
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 pip install -e .                      # makes `import hfm` work everywhere
-pytest                                # 37 tests
+pytest                                # 45 tests
 python scripts/phase1_preprocess.py   # writes data/processed/ and figures/01_*.png
 python scripts/phase2_baselines.py    # writes results/02_*.csv and figures/02_*.png
 python scripts/phase3_bbso.py         # ~90 s; writes results/03_* and figures/03_*.png
 python scripts/phase4_membership.py   # writes results/04_*.csv and figures/04_*.png
+python scripts/phase5_fuzzy_inference.py  # ~15 s; writes results/05_* and figures/05_*.png
 ```
 
 ## Data
@@ -251,16 +252,87 @@ cannot learn the source hospital from the pattern of what was recorded. This dif
 baselines, which see the training mean or mode in those cells. The fuzzifier records which cells
 were missing so that an explanation can say "not measured".
 
+## Fuzzy inference and defuzzification
+
+`src/hfm/fuzzy_model.py` turns the membership functions into a classifier with the structure the
+patent describes:
+
+1. **One fuzzy model per attribute.** Each linguistic term is the antecedent of one rule,
+   `IF attribute IS term THEN risk IS …`. The consequent is learned from the training split as the
+   membership-weighted class share of the patients in that term (Laplace-smoothed). For a patient
+   the attribute's rules fire with the term memberships and their consequents are combined by
+   firing strength into a per-attribute class-score vector. The whole rule base is 31 rules.
+2. **Weighted average across attributes.** Weights are learned on an inner 3-fold CV of the
+   training split as the single-attribute model's macro F1 above the majority-class floor,
+   normalised. An attribute that was not measured for a patient is skipped and the remaining
+   weights renormalised.
+3. **Output sets and centroid.** The combined scores clip three output sets (Low / Moderate /
+   High) on a risk axis from 0 to 1; the aggregated shape is defuzzified by the centre-of-gravity
+   method into one crisp risk score.
+4. **Cut-points** on the risk axis, chosen on inner-CV out-of-fold scores of the training split
+   to maximise macro F1.
+
+The model is a scikit-learn estimator over the cleaned raw frame, so it is evaluated by exactly
+the same code as the baselines.
+
+![rules](figures/05_rules.png)
+
+A compact Wang–Mendel rule base with two- or three-antecedent rules was considered as a comparison
+and not built: on ten attributes with three to four terms each, even the pairwise version yields
+several hundred rules, which defeats the purpose. It is in the backlog.
+
 ## Results
 
-The fuzzy inference step is not built yet. When it is, its results will be reported with the same
-stratified cross-validation, held-out split and per-hospital breakdown as the baselines above.
-Because the patent's label setup differs from this one (see the note on class supports), the
-patent's reported figures are quoted for reference only and are not used as a benchmark.
+All numbers come from the same protocol: 5-fold stratified CV on the 736 training rows with
+every statistic refitted inside the fold, then one fit on all training rows scored on the 184
+held-out rows. The patent's label setup differs from this one (see the note on class supports),
+so its reported figures are quoted for reference only and are not used as a benchmark.
+
+| model | CV macro F1 (mean ± sd) | CV accuracy | test macro F1 | test accuracy |
+|---|---|---|---|---|
+| majority class (always *Low*) | 0.21 ± 0.00 | 0.45 | 0.21 | 0.45 |
+| logistic regression | 0.62 ± 0.05 | 0.65 | 0.61 | 0.65 |
+| random forest | 0.63 ± 0.05 | 0.66 | 0.62 | 0.65 |
+| MLP (32, 16) | 0.61 ± 0.04 | 0.64 | 0.56 | 0.61 |
+| **hybrid fuzzy model** (BBSO subset, centroid + cut-points) | 0.58 ± 0.03 | 0.60 | 0.50 | 0.52 |
+| hybrid fuzzy, argmax decision (diagnostic) | 0.54 ± 0.04 | 0.62 | 0.51 | 0.59 |
+
+![comparison](figures/05_fuzzy_vs_baselines.png)
+
+Stated plainly:
+
+- Under cross-validation the fuzzy model sits about one fold's standard deviation below the
+  three baselines and well above the floor. On the held-out split it drops further, to a macro
+  F1 of 0.50; with 184 test patients the standard error of that number is about 0.04.
+- The argmax diagnostic shows that the patent's defuzzification path is not what costs accuracy:
+  taking the largest combined class score instead of the centroid is *worse* on CV macro F1. The
+  gap to the baselines comes from the model itself: single-antecedent rules cannot express
+  interactions between attributes, and because nothing is imputed, patients from Switzerland and
+  VA are scored on fewer attributes.
+- *Moderate* (single-vessel disease) is the hard class for every model in this project, and on
+  the fuzzy model's risk axis it occupies a band only 0.09 wide.
+- Per hospital, the fuzzy model follows the baselines' pattern (Hungary easiest, Switzerland
+  hardest) and matches them on Switzerland without seeing any imputed cholesterol or vessel count.
+
+What the fuzzy model offers instead of accuracy is a complete, inspectable account of every
+prediction. For one patient, `HybridFuzzyClassifier.explain` returns the fired terms with their
+memberships, each attribute's class scores and effective weight, the combined scores, the
+aggregated output shape, the centroid and the decision:
+
+![explanation](figures/05_explain_patient_complete.png)
+
+A patient whose fluoroscopy and thalassemia test were never done is scored on the eight measured
+attributes, with their weights renormalised and the two missing ones marked as skipped:
+
+![explanation, missing attributes](figures/05_explain_patient_missing.png)
 
 ## Backlog
 
-Ideas worth running once the full pipeline exists, not yet done:
+Ideas worth running, not yet done:
+
+- **Compact multi-antecedent rules.** A Wang–Mendel rule base restricted to the three or four
+  highest-weight attributes (at most a few dozen rules) as a comparison to the single-antecedent
+  model, to measure what attribute interactions are worth while staying readable.
 
 - **Hospital-linked imputation ablation.** `ca`, `thal` and `slope` are mostly missing outside
   Cleveland and are filled with the training mode or mean, so after imputation they partly encode
