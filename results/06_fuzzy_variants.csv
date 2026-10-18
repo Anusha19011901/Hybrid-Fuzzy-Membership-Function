@@ -1,0 +1,3 @@
+model,n_rules,pairs,oof_risk_sd,oof_risk_iqr,cutpoints
+hybrid_fuzzy,31,[],0.06701194293250282,0.11948076847232175,"(0.417, 0.506)"
+hybrid_fuzzy_pairs,60,"[('ca', 'cp'), ('ca', 'slope'), ('cp', 'slope')]",0.07642968214031007,0.1345904268476662,"(0.44, 0.533)"

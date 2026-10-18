@@ -124,3 +124,47 @@ def per_site(y_true, y_pred, site) -> pd.DataFrame:
 def summarize(results: list[CVResult]) -> pd.DataFrame:
     """One row per model: mean and std of each CV metric."""
     return pd.DataFrame([r.summary for r in results])
+
+
+def bootstrap_ci(
+    y_true, y_pred, n_boot: int = 2000, seed: int = config.SEED, alpha: float = 0.05
+) -> pd.DataFrame:
+    """Percentile bootstrap CI of accuracy and macro F1 over resampled rows.
+
+    Returns one row per metric with point estimate, lower and upper bound.
+    """
+    y_true, y_pred = np.asarray(y_true), np.asarray(y_pred)
+    rng = np.random.default_rng(seed)
+    n = len(y_true)
+    acc, f1 = np.empty(n_boot), np.empty(n_boot)
+    for b in range(n_boot):
+        idx = rng.integers(0, n, n)
+        acc[b] = accuracy_score(y_true[idx], y_pred[idx])
+        f1[b] = f1_score(y_true[idx], y_pred[idx], labels=config.RISK_LEVELS, average="macro", zero_division=0)
+    point = score(y_true, y_pred)
+    rows = []
+    for name, draws in (("accuracy", acc), ("macro_f1", f1)):
+        lo, hi = np.quantile(draws, [alpha / 2, 1 - alpha / 2])
+        rows.append({"metric": name, "estimate": point[name], "ci_low": lo, "ci_high": hi})
+    return pd.DataFrame(rows).set_index("metric")
+
+
+def paired_bootstrap_diff(
+    y_true, y_pred_a, y_pred_b, n_boot: int = 2000, seed: int = config.SEED, alpha: float = 0.05
+) -> pd.DataFrame:
+    """CI of metric(a) - metric(b) on the *same* resampled rows (paired)."""
+    y_true, a, b = (np.asarray(v) for v in (y_true, y_pred_a, y_pred_b))
+    rng = np.random.default_rng(seed)
+    n = len(y_true)
+    d_acc, d_f1 = np.empty(n_boot), np.empty(n_boot)
+    for k in range(n_boot):
+        idx = rng.integers(0, n, n)
+        d_acc[k] = accuracy_score(y_true[idx], a[idx]) - accuracy_score(y_true[idx], b[idx])
+        d_f1[k] = (f1_score(y_true[idx], a[idx], labels=config.RISK_LEVELS, average="macro", zero_division=0)
+                   - f1_score(y_true[idx], b[idx], labels=config.RISK_LEVELS, average="macro", zero_division=0))
+    sa, sb = score(y_true, a), score(y_true, b)
+    rows = []
+    for name, draws in (("accuracy", d_acc), ("macro_f1", d_f1)):
+        lo, hi = np.quantile(draws, [alpha / 2, 1 - alpha / 2])
+        rows.append({"metric": name, "difference": sa[name] - sb[name], "ci_low": lo, "ci_high": hi})
+    return pd.DataFrame(rows).set_index("metric")

@@ -81,3 +81,16 @@ def test_pipeline_attribute_subset(split):
     # categorical-only subset: no numeric branch at all
     pipe = make_pipeline(make_baselines()["logistic_regression"], attributes=["sex", "exang"]).fit(Xtr, ytr)
     assert list(pipe.named_steps["pre"].get_feature_names_out()) == ["sex_Male", "exang_True"]
+
+
+def test_bootstrap_ci_contains_estimate_and_is_seeded():
+    rng = np.random.default_rng(0)
+    y = rng.choice(config.RISK_LEVELS, 200)
+    pred = np.where(rng.random(200) < 0.6, y, rng.choice(config.RISK_LEVELS, 200))
+    ci = evaluation.bootstrap_ci(y, pred, n_boot=300)
+    for m in ("accuracy", "macro_f1"):
+        assert ci.loc[m, "ci_low"] <= ci.loc[m, "estimate"] <= ci.loc[m, "ci_high"]
+        assert 0 < ci.loc[m, "ci_high"] - ci.loc[m, "ci_low"] < 0.3
+    assert ci.equals(evaluation.bootstrap_ci(y, pred, n_boot=300))
+    d = evaluation.paired_bootstrap_diff(y, pred, pred, n_boot=100)
+    assert (d["difference"] == 0).all() and (d["ci_low"] == 0).all()

@@ -105,3 +105,24 @@ def test_argmax_decision_variant(split):
     assert (pred == np.array(CLASSES)[np.argmax(m.predict_proba(Xte), axis=1)]).all()
     with pytest.raises(ValueError):
         HybridFuzzyClassifier(attributes=ATTRS, decision="nope").fit(Xtr, ytr).predict(Xte)
+
+
+def test_pairwise_layer(split):
+    Xtr, ytr, Xte, yte = split
+    m = HybridFuzzyClassifier(attributes=ATTRS, pair_top_k=3).fit(Xtr, ytr)
+    assert len(m.pairs_) == 3 and all(len(p) == 2 for p in m.pairs_)
+    rt = m.rule_table()
+    assert set(rt["antecedents"]) == {1, 2}
+    assert (rt.loc[rt.antecedents == 2, "support"] >= m.pair_min_support).all()
+    assert np.allclose(rt[CLASSES].sum(axis=1), 1.0)
+    assert np.isclose(m.weights_.sum(), 1.0) and len(m.weights_) == len(ATTRS) + 3
+    pred = m.predict(Xte)
+    assert set(pred) <= set(CLASSES)
+    ex = m.explain(Xte.iloc[[0]])
+    pair_rows = [r for r in ex["attributes"] if r["antecedents"] == 2]
+    assert len(pair_rows) == 3 and all(" × " in r["attribute"] for r in pair_rows)
+    assert np.isclose(sum(r["effective_weight"] for r in ex["attributes"]), 1.0)
+    # pair_top_k=0 reproduces the single-antecedent model exactly
+    a = HybridFuzzyClassifier(attributes=ATTRS).fit(Xtr, ytr)
+    b = HybridFuzzyClassifier(attributes=ATTRS, pair_top_k=0).fit(Xtr, ytr)
+    assert (a.predict(Xte) == b.predict(Xte)).all() and a.cutpoints_ == b.cutpoints_

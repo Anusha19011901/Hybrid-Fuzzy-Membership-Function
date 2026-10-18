@@ -31,7 +31,7 @@ handles the imprecision of clinical data while remaining readable by a clinician
 | 3 | Binary Brain Storm Optimization for feature selection | done |
 | 4 | Hybrid trapezoidal + Gaussian membership functions, data-derived | done |
 | 5 | Fuzzy inference: per-attribute rules, weighted average, centroid | done |
-| 6 | Stratified CV evaluation vs. baselines, explainability plots | planned |
+| 6 | Consolidated evaluation with bootstrap CIs, per-hospital view, explainability | done |
 
 ## Repository layout
 
@@ -51,12 +51,13 @@ tests/               pytest suite
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 pip install -e .                      # makes `import hfm` work everywhere
-pytest                                # 45 tests
+pytest                                # 47 tests
 python scripts/phase1_preprocess.py   # writes data/processed/ and figures/01_*.png
 python scripts/phase2_baselines.py    # writes results/02_*.csv and figures/02_*.png
 python scripts/phase3_bbso.py         # ~90 s; writes results/03_* and figures/03_*.png
 python scripts/phase4_membership.py   # writes results/04_*.csv and figures/04_*.png
 python scripts/phase5_fuzzy_inference.py  # ~15 s; writes results/05_* and figures/05_*.png
+python scripts/phase6_final.py            # ~60 s; every model, bootstrap CIs, per-hospital view
 ```
 
 ## Data
@@ -277,62 +278,97 @@ the same code as the baselines.
 
 ![rules](figures/05_rules.png)
 
-A compact Wang–Mendel rule base with two- or three-antecedent rules was considered as a comparison
-and not built: on ten attributes with three to four terms each, even the pairwise version yields
-several hundred rules, which defeats the purpose. It is in the backlog.
+**Pairwise variant.** A compact two-antecedent layer can be switched on (`pair_top_k=3`): rules
+`IF a IS t1 AND b IS t2` over every pair of the three highest-weight attributes (`cp`, `ca`,
+`slope`), firing with the product of the two memberships, learned and weighted like a single
+attribute, with rules supported by fewer than five training patients pruned. That adds 29 rules
+for a total of 60, still one page. It was evaluated in a time-boxed improvement round and the
+main model was chosen by CV macro F1 on the training split, as decided before the round.
 
 ## Results
 
-All numbers come from the same protocol: 5-fold stratified CV on the 736 training rows with
-every statistic refitted inside the fold, then one fit on all training rows scored on the 184
-held-out rows. The patent's label setup differs from this one (see the note on class supports),
-so its reported figures are quoted for reference only and are not used as a benchmark.
+### The interpretability story
 
-| model | CV macro F1 (mean ± sd) | CV accuracy | test macro F1 | test accuracy |
-|---|---|---|---|---|
-| majority class (always *Low*) | 0.21 ± 0.00 | 0.45 | 0.21 | 0.45 |
-| logistic regression | 0.62 ± 0.05 | 0.65 | 0.61 | 0.65 |
-| random forest | 0.63 ± 0.05 | 0.66 | 0.62 | 0.65 |
-| MLP (32, 16) | 0.61 ± 0.04 | 0.64 | 0.56 | 0.61 |
-| **hybrid fuzzy model** (BBSO subset, centroid + cut-points) | 0.58 ± 0.03 | 0.60 | 0.50 | 0.52 |
-| hybrid fuzzy, argmax decision (diagnostic) | 0.54 ± 0.04 | 0.62 | 0.51 | 0.59 |
+The patented method is a classifier whose every step can be read by a person. The data (920
+patients from four hospitals) are cleaned and labelled; Binary Brain Storm Optimization picks ten
+of the thirteen clinical attributes; each continuous attribute gets *Low / Normal / High* terms
+whose shapes come from the training data in clinical units; each term is one rule whose
+consequent is the class share of the patients in it; the rules fire with the patient's
+memberships, the attributes are averaged with weights that reflect how informative each one is,
+and the result is defuzzified by centre of gravity into one risk score on a 0–1 axis.
 
-![comparison](figures/05_fuzzy_vs_baselines.png)
-
-Stated plainly:
-
-- Under cross-validation the fuzzy model sits about one fold's standard deviation below the
-  three baselines and well above the floor. On the held-out split it drops further, to a macro
-  F1 of 0.50; with 184 test patients the standard error of that number is about 0.04.
-- The argmax diagnostic shows that the patent's defuzzification path is not what costs accuracy:
-  taking the largest combined class score instead of the centroid is *worse* on CV macro F1. The
-  gap to the baselines comes from the model itself: single-antecedent rules cannot express
-  interactions between attributes, and because nothing is imputed, patients from Switzerland and
-  VA are scored on fewer attributes.
-- *Moderate* (single-vessel disease) is the hard class for every model in this project, and on
-  the fuzzy model's risk axis it occupies a band only 0.09 wide.
-- Per hospital, the fuzzy model follows the baselines' pattern (Hungary easiest, Switzerland
-  hardest) and matches them on Switzerland without seeing any imputed cholesterol or vessel count.
-
-What the fuzzy model offers instead of accuracy is a complete, inspectable account of every
-prediction. For one patient, `HybridFuzzyClassifier.explain` returns the fired terms with their
-memberships, each attribute's class scores and effective weight, the combined scores, the
-aggregated output shape, the centroid and the decision:
+For any patient the model returns a full account: which terms fired and how strongly, what each
+attribute contributed, the combined scores, the output shape, the centroid and the decision. A
+patient with missing tests is scored on what was measured, with the missing attributes shown as
+skipped rather than filled in. The rule base (shown in the previous section) fits on one page, and
+the two figures below are that account for a complete Cleveland record and for a VA record with
+two tests never done.
 
 ![explanation](figures/05_explain_patient_complete.png)
 
-A patient whose fluoroscopy and thalassemia test were never done is scored on the eight measured
-attributes, with their weights renormalised and the two missing ones marked as skipped:
-
 ![explanation, missing attributes](figures/05_explain_patient_missing.png)
+
+### The numbers
+
+All models under one protocol: 5-fold stratified CV on 736 training rows with every statistic
+refitted inside the fold, then one fit on all training rows scored on 184 held-out rows with
+2,000-sample bootstrap 95% confidence intervals. The patent's label setup differs from this one
+(see the note on class supports), so its reported figures are not used as a benchmark.
+
+| model | CV macro F1 (mean ± sd) | test macro F1 [95% CI] | test accuracy [95% CI] | vs. random forest, macro F1 [95% CI] |
+|---|---|---|---|---|
+| majority class (always *Low*) | 0.21 ± 0.00 | 0.21 [0.18, 0.23] | 0.45 [0.38, 0.52] | −0.41 [−0.49, −0.33] |
+| logistic regression | 0.62 ± 0.05 | 0.61 [0.54, 0.68] | 0.65 [0.58, 0.71] | −0.01 [−0.07, 0.06] |
+| random forest | 0.63 ± 0.05 | 0.62 [0.54, 0.69] | 0.65 [0.58, 0.72] | reference |
+| MLP (32, 16) | 0.61 ± 0.04 | 0.56 [0.49, 0.63] | 0.61 [0.54, 0.68] | −0.06 [−0.13, 0.01] |
+| **hybrid fuzzy, main (31 rules)** | 0.58 ± 0.03 | 0.50 [0.43, 0.57] | 0.52 [0.45, 0.59] | −0.12 [−0.20, −0.04] |
+| hybrid fuzzy + pairwise rules (60 rules) | 0.58 ± 0.04 | 0.54 [0.47, 0.61] | 0.58 [0.51, 0.65] | −0.08 [−0.15, −0.01] |
+
+![test CIs](figures/06_test_ci.png)
+
+- The three conventional baselines are indistinguishable from one another: every paired
+  difference against the random forest includes zero.
+- The main fuzzy model is about 0.05 macro F1 behind the baselines under CV, and further behind
+  on the held-out split. It is the only model whose CV mean falls outside its own test CI, and its
+  paired difference to the random forest excludes zero, so the CV-to-test drop is not noise. The
+  likely cause is cut-point fragility: the two thresholds sit on a compressed risk axis (nearly
+  all patients between 0.33 and 0.57), so a small shift in the test distribution moves many
+  patients across them. An argmax decision that bypasses the centroid is worse under CV, so the
+  defuzzification itself is not the problem.
+- The pairwise variant ties the main model under CV (0.579 vs 0.581, which is why it did not
+  become the main model), widens the risk axis slightly, and does better on the held-out split
+  with its CV mean inside its CI. That better test score is reported, not used for selection.
+- *Moderate* (single-vessel disease) is the hard class for every model: out-of-fold Moderate F1
+  is about 0.47 across the board.
+- Per hospital, on out-of-fold training predictions, the fuzzy models match the baselines at
+  Cleveland, Hungary and Switzerland and trail slightly at VA Long Beach. They reach the Swiss
+  result without a single imputed value.
+
+![per-site, all models](figures/06_per_site_all.png)
+
+### Limitations
+
+- **Accuracy.** Single-antecedent rules cannot express interactions between attributes; the
+  pairwise layer recovers some of that, not all. The conventional baselines are better classifiers
+  on this data, and the gap is statistically clear on the held-out split.
+- **Cut-point fragility.** Two thresholds on a compressed risk axis are sensitive to distribution
+  shift. Calibrating the combined scores before defuzzification, or regularising the cut-points,
+  is the obvious next step and is in the backlog.
+- **Hospital-linked attributes.** `ca`, `thal` and `slope` are measured mostly at Cleveland and
+  carry the highest weights. The fuzzy model never imputes them, but their presence still differs
+  by site; the ablation in the backlog would quantify that dependence.
+- **Labels.** The Low / Moderate / High mapping is this project's choice. The patent's class
+  supports do not match any grouping of `num`, so its reported metrics are not comparable.
+- **Data and scope.** 920 patients from four hospitals, collected decades ago. This is a research
+  reimplementation; nothing here is validated for clinical use.
 
 ## Backlog
 
 Ideas worth running, not yet done:
 
-- **Compact multi-antecedent rules.** A Wang–Mendel rule base restricted to the three or four
-  highest-weight attributes (at most a few dozen rules) as a comparison to the single-antecedent
-  model, to measure what attribute interactions are worth while staying readable.
+- **Cut-point robustness.** Calibrate the combined class scores (e.g. temperature scaling on the
+  inner CV) before defuzzification so the risk axis is not compressed, or choose the cut-points
+  with a smoothness penalty, and check whether the CV-to-test drop closes.
 
 - **Hospital-linked imputation ablation.** `ca`, `thal` and `slope` are mostly missing outside
   Cleveland and are filled with the training mode or mean, so after imputation they partly encode

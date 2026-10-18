@@ -1,0 +1,8 @@
+{
+  "main_fuzzy_model": "hybrid_fuzzy",
+  "rule": "higher 5-fold CV macro F1 on the training split",
+  "cv_macro_f1": {
+    "hybrid_fuzzy": 0.5807242657547409,
+    "hybrid_fuzzy_pairs": 0.578883780655473
+  }
+}
