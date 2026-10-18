@@ -45,7 +45,7 @@ ATTRIBUTE_LABELS = {
     "trestbps": "Resting blood pressure (mm Hg)",
     "chol": "Serum cholesterol (mg/dl)",
     "thalch": "Max heart rate achieved",
-    "oldpeak": "ST depression (exercise)",
+    "oldpeak": "Exercise ST depression",
     "ca": "Major vessels coloured (0-3)",
     "sex": "Sex",
     "cp": "Chest pain type",
@@ -77,3 +77,18 @@ RISK_MAPPINGS: dict[str, dict[int, str]] = {
     "severe_only": {0: "Low", 1: "Moderate", 2: "Moderate", 3: "High", 4: "High"},
 }
 DEFAULT_RISK_MAPPING = "default"
+
+# --------------------------------------------------------------------------- #
+# Fuzzy membership (phase 4)
+# --------------------------------------------------------------------------- #
+# Linguistic terms for continuous attributes, in increasing order of value.
+LINGUISTIC_TERMS = ["Low", "Normal", "High"]
+# Training-set quantiles that place the trapezoid break points:
+# Low  = (-inf, -inf, q[0], q[1]),  Normal = (q[0], q[1], q[2], q[3]),  High = (q[2], q[3], inf, inf)
+TRAPEZOID_QUANTILES = (0.2, 0.4, 0.6, 0.8)
+# Clinical units for plots and explanations.
+ATTRIBUTE_UNITS = {
+    "age": "years", "trestbps": "mm Hg", "chol": "mg/dl", "thalch": "bpm", "oldpeak": "mm",
+}
+# Where the selected subset is persisted by scripts/phase3_bbso.py.
+SELECTED_ATTRIBUTES_JSON = RESULTS_DIR / "03_runtime.json"

@@ -1,11 +1,11 @@
 seed,best_macro_f1,n_iter,stopped_early,n_selected,selected,seconds
-0,0.6397249942737208,36,True,10,age trestbps thalch oldpeak ca cp restecg exang slope thal,15.5
-1,0.6382089046360168,23,True,10,age chol thalch oldpeak ca sex cp restecg slope thal,8.5
-2,0.6317033190964135,15,True,8,age trestbps thalch ca cp exang slope thal,5.7
-3,0.6397249942737208,25,True,10,age trestbps thalch oldpeak ca cp restecg exang slope thal,8.0
-4,0.6397249942737208,36,True,10,age trestbps thalch oldpeak ca cp restecg exang slope thal,10.5
-5,0.6397249942737208,26,True,10,age trestbps thalch oldpeak ca cp restecg exang slope thal,7.2
-6,0.6397249942737208,26,True,10,age trestbps thalch oldpeak ca cp restecg exang slope thal,6.7
+0,0.6397249942737208,36,True,10,age trestbps thalch oldpeak ca cp restecg exang slope thal,15.0
+1,0.6382089046360168,23,True,10,age chol thalch oldpeak ca sex cp restecg slope thal,9.0
+2,0.6317033190964135,15,True,8,age trestbps thalch ca cp exang slope thal,5.6
+3,0.6397249942737208,25,True,10,age trestbps thalch oldpeak ca cp restecg exang slope thal,7.8
+4,0.6397249942737208,36,True,10,age trestbps thalch oldpeak ca cp restecg exang slope thal,10.4
+5,0.6397249942737208,26,True,10,age trestbps thalch oldpeak ca cp restecg exang slope thal,7.3
+6,0.6397249942737208,26,True,10,age trestbps thalch oldpeak ca cp restecg exang slope thal,6.4
 7,0.6397249942737208,33,True,10,age trestbps thalch oldpeak ca cp restecg exang slope thal,8.4
-8,0.634559593021038,25,True,11,age trestbps chol thalch oldpeak ca sex cp restecg slope thal,6.6
+8,0.634559593021038,25,True,11,age trestbps chol thalch oldpeak ca sex cp restecg slope thal,6.4
 9,0.6397249942737208,18,True,10,age trestbps thalch oldpeak ca cp restecg exang slope thal,4.1

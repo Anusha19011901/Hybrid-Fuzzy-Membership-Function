@@ -29,7 +29,7 @@ handles the imprecision of clinical data while remaining readable by a clinician
 | 1 | Data loading, risk labels, leakage-safe preprocessing | done |
 | 2 | Baselines: logistic regression, random forest, small MLP, majority-class floor | done |
 | 3 | Binary Brain Storm Optimization for feature selection | done |
-| 4 | Hybrid trapezoidal + Gaussian membership functions, data-derived | planned |
+| 4 | Hybrid trapezoidal + Gaussian membership functions, data-derived | done |
 | 5 | Fuzzy inference: Wang–Mendel rules, weighted average, centroid | planned |
 | 6 | Stratified CV evaluation vs. baselines, explainability plots | planned |
 
@@ -41,7 +41,7 @@ figures/             all figures, numbered by phase
 notebooks/           one walkthrough notebook per phase
 results/             metric tables (CSV), numbered by phase
 scripts/             one runnable script per phase
-src/hfm/             the library: config, data, preprocess, models, evaluation, bbso, plotting
+src/hfm/             the library: config, data, preprocess, models, evaluation, bbso, membership, plotting
 tests/               pytest suite
 ```
 
@@ -51,10 +51,11 @@ tests/               pytest suite
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 pip install -e .                      # makes `import hfm` work everywhere
-pytest                                # 28 tests
+pytest                                # 37 tests
 python scripts/phase1_preprocess.py   # writes data/processed/ and figures/01_*.png
 python scripts/phase2_baselines.py    # writes results/02_*.csv and figures/02_*.png
 python scripts/phase3_bbso.py         # ~90 s; writes results/03_* and figures/03_*.png
+python scripts/phase4_membership.py   # writes results/04_*.csv and figures/04_*.png
 ```
 
 ## Data
@@ -205,9 +206,54 @@ Two findings, stated plainly:
 | random forest | 0.63 ± 0.05 | 0.64 ± 0.05 | 0.62 | 0.59 |
 | MLP | 0.61 ± 0.04 | 0.58 ± 0.04 | 0.56 | 0.57 |
 
+## Hybrid membership functions
+
+This is the patent's core idea: for each linguistic term, the membership of a value is the
+**element-wise maximum of a trapezoid and a Gaussian**. The patent hand-picked the parameters.
+Here `src/hfm/membership.py` derives every parameter from the training split, from observed
+(non-imputed) values only, in clinical units:
+
+- Trapezoid break points are training quantiles (20 / 40 / 60 / 80 %). *Low* is fully true
+  below q20 and fades out by q40; *Normal* is fully true between q40 and q60; *High* is fully
+  true above q80. Ramps are kept at least 5 % of the observed range wide, so an attribute with
+  a pile-up at one value (`oldpeak` is 0 for a third of patients) still gets readable terms.
+- The Gaussian of a term has mean and standard deviation equal to those of the training values
+  whose trapezoid membership in that term is at least 0.5, with the mean clamped into the term's
+  plateau.
+
+![membership](figures/04_membership_overview.png)
+
+**Fuzzy terms only for continuous attributes.** The four continuous attributes in the BBSO
+subset (`age`, `trestbps`, `thalch`, `oldpeak`) get *Low / Normal / High*. The categorical
+attributes (`cp`, `restecg`, `exang`, `slope`, `thal`) and the vessel count `ca` get **crisp**
+terms: one per category, membership 1 for the patient's own category and 0 for every other.
+A chest-pain type or an ECG finding is a recorded fact with no ordering and no overlap between
+categories, so there is nothing for a fuzzy boundary to express; `ca` takes four integer values
+and is imputed for two thirds of patients, so spreading it over fuzzy terms would add uncertainty
+the data does not contain. The result is 31 membership columns for the ten attributes.
+
+**Shape check.** A maximum of two shapes can turn a term into a two-humped curve if the Gaussian
+peak sits outside the trapezoid plateau (the patent's own FIG. 4 has that shape). `shape_check`
+samples every hybrid term on a fine grid and counts its peaks; the result is in
+`results/04_shape_check.csv`. On the first fit one term failed: the `oldpeak` *Normal* core mean
+was 1.05 mm, just past its plateau edge at 1.00 mm, and produced a second bump of height 0.01.
+Clamping the Gaussian mean into the plateau removed it, and the clamp is a guarantee rather than
+a patch: left of the plateau both components are non-decreasing, right of it both are
+non-increasing, so their maximum is single-peaked by construction. The unclamped mean is kept in
+the parameter table (`mu_raw`, `mu_clamped`) so the case stays visible. All twelve terms are
+single-peaked.
+
+**Missing values: a deliberate fuzzy approach.** The fuzzy model does not impute. A missing
+reading gets membership 0 in every term of its attribute, so no rule can fire on it; the
+inference step skips that attribute for that patient and renormalises the weights of the
+measured ones. Nothing is filled and no missingness indicator is added, so the fuzzy model
+cannot learn the source hospital from the pattern of what was recorded. This differs from the
+baselines, which see the training mean or mode in those cells. The fuzzifier records which cells
+were missing so that an explanation can say "not measured".
+
 ## Results
 
-The fuzzy model is not built yet. When it is, its results will be reported with the same
+The fuzzy inference step is not built yet. When it is, its results will be reported with the same
 stratified cross-validation, held-out split and per-hospital breakdown as the baselines above.
 Because the patent's label setup differs from this one (see the note on class supports), the
 patent's reported figures are quoted for reference only and are not used as a benchmark.

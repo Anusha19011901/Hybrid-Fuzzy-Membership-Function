@@ -1,0 +1,13 @@
+attribute,term,peaks,quasi_concave,gauss_extension,mu_inside_plateau
+age,Low,1,True,0.10477035834407808,True
+age,Normal,1,True,0.036907823934141125,True
+age,High,1,True,0.1879746155831673,True
+trestbps,Low,1,True,0.2757146989633291,True
+trestbps,Normal,1,True,0.023520531950621766,True
+trestbps,High,1,True,0.40132536391529683,True
+thalch,Low,1,True,0.19267927929032724,True
+thalch,Normal,1,True,0.04516953838542834,True
+thalch,High,1,True,0.10204391006047465,True
+oldpeak,Low,1,True,0.17132729024130924,True
+oldpeak,Normal,1,True,0.06112473839321475,True
+oldpeak,High,1,True,0.2395234818107251,True

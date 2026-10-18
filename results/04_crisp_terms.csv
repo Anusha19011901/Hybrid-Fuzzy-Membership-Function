@@ -1,0 +1,7 @@
+attribute,categories,n_terms,training_mode,missing_train,missing_train_pct
+ca,0 | 1 | 2 | 3,4,0,492,66.8
+cp,asymptomatic | atypical angina | non-anginal | typical angina,4,asymptomatic,0,0.0
+restecg,lv hypertrophy | normal | st-t abnormality,3,normal,1,0.1
+exang,False | True,2,False,37,5.0
+slope,downsloping | flat | upsloping,3,flat,248,33.7
+thal,fixed defect | normal | reversable defect,3,normal,387,52.6
