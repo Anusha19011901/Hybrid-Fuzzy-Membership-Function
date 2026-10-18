@@ -51,6 +51,21 @@ def make_baselines(seed: int = config.SEED) -> dict[str, BaseEstimator]:
     }
 
 
-def make_pipeline(model: BaseEstimator, scaler: str = "standard") -> Pipeline:
-    """Preprocessing + model in one estimator, so CV refits the statistics per fold."""
-    return Pipeline([("pre", build_preprocessor(scaler=scaler)), ("model", model)])
+def make_pipeline(
+    model: BaseEstimator, scaler: str = "standard", attributes: list[str] | None = None
+) -> Pipeline:
+    """Preprocessing + model in one estimator, so CV refits the statistics per fold.
+
+    ``attributes`` restricts the pipeline to a subset of the 13 clinical
+    attributes (e.g. the BBSO selection); each attribute keeps or drops all of
+    its encoded columns together.
+    """
+    kw = {}
+    if attributes is not None:
+        keep = set(attributes)
+        kw = dict(
+            continuous_cols=[c for c in config.CONTINUOUS_COLS if c in keep],
+            discrete_cols=[c for c in config.DISCRETE_COLS if c in keep],
+            categorical_cols=[c for c in config.CATEGORICAL_COLS if c in keep],
+        )
+    return Pipeline([("pre", build_preprocessor(scaler=scaler, **kw)), ("model", model)])

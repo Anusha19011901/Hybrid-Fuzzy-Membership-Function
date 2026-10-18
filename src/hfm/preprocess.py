@@ -116,12 +116,13 @@ def build_preprocessor(
         ("onehot", OneHotEncoder(drop="if_binary", handle_unknown="ignore", sparse_output=False)),
     ]
 
+    branches = [
+        ("cont", Pipeline(continuous_steps), continuous_cols),
+        ("disc", Pipeline(discrete_steps), discrete_cols),
+        ("cat", Pipeline(categorical_steps), categorical_cols),
+    ]
     pre = ColumnTransformer(
-        transformers=[
-            ("cont", Pipeline(continuous_steps), continuous_cols),
-            ("disc", Pipeline(discrete_steps), discrete_cols),
-            ("cat", Pipeline(categorical_steps), categorical_cols),
-        ],
+        transformers=[b for b in branches if b[2]],   # a subset may empty a branch
         remainder="drop",
         verbose_feature_names_out=False,
     )
@@ -129,20 +130,29 @@ def build_preprocessor(
     return pre
 
 
+def _branch_columns(pre: ColumnTransformer, name: str) -> list[str]:
+    for n, _, cols in pre.transformers_:
+        if n == name:
+            return list(cols)
+    return []
+
+
 def fitted_numeric_stats(pre: ColumnTransformer) -> pd.DataFrame:
     """Imputation means and clip fences learned on the training split."""
-    cont = pre.named_transformers_["cont"]
-    disc = pre.named_transformers_["disc"]
-    cont_cols = list(pre.transformers_[0][2])
-    disc_cols = list(pre.transformers_[1][2])
-    rows = pd.DataFrame(
-        {"mean": cont.named_steps["impute"].statistics_}, index=cont_cols
-    )
-    if "clip" in cont.named_steps:
-        rows["clip_lower"] = cont.named_steps["clip"].lower_
-        rows["clip_upper"] = cont.named_steps["clip"].upper_
-    disc_rows = pd.DataFrame({"mean": disc.named_steps["impute"].statistics_}, index=disc_cols)
-    return pd.concat([rows, disc_rows])
+    frames = []
+    cont_cols = _branch_columns(pre, "cont")
+    if cont_cols:
+        cont = pre.named_transformers_["cont"]
+        rows = pd.DataFrame({"mean": cont.named_steps["impute"].statistics_}, index=cont_cols)
+        if "clip" in cont.named_steps:
+            rows["clip_lower"] = cont.named_steps["clip"].lower_
+            rows["clip_upper"] = cont.named_steps["clip"].upper_
+        frames.append(rows)
+    disc_cols = _branch_columns(pre, "disc")
+    if disc_cols:
+        disc = pre.named_transformers_["disc"]
+        frames.append(pd.DataFrame({"mean": disc.named_steps["impute"].statistics_}, index=disc_cols))
+    return pd.concat(frames)
 
 
 def transform_to_frame(pre: ColumnTransformer, X: pd.DataFrame) -> pd.DataFrame:
@@ -207,14 +217,17 @@ def to_clinical_units(pre: ColumnTransformer, X: pd.DataFrame) -> pd.DataFrame:
     clipping are not undone: this is what the model saw, in readable units.
     """
     out = pd.DataFrame(index=X.index)
-    for name, cols in (("cont", config.CONTINUOUS_COLS), ("disc", config.DISCRETE_COLS)):
-        cols = list(pre.transformers_[[t[0] for t in pre.transformers_].index(name)][2])
+    for name in ("cont", "disc"):
+        cols = _branch_columns(pre, name)
+        if not cols:
+            continue
         scaler = pre.named_transformers_[name].named_steps["scale"]
         vals = X[cols].to_numpy(dtype=float)
         if scaler != "passthrough":
             vals = scaler.inverse_transform(vals)
         out[cols] = vals
-    onehot = pre.named_transformers_["cat"].named_steps["onehot"]
-    cat_cols = list(pre.transformers_[2][2])
-    out[cat_cols] = onehot.inverse_transform(X[onehot.get_feature_names_out(cat_cols)].to_numpy())
-    return out[config.FEATURE_COLS]
+    cat_cols = _branch_columns(pre, "cat")
+    if cat_cols:
+        onehot = pre.named_transformers_["cat"].named_steps["onehot"]
+        out[cat_cols] = onehot.inverse_transform(X[onehot.get_feature_names_out(cat_cols)].to_numpy())
+    return out[[c for c in config.FEATURE_COLS if c in out.columns]]

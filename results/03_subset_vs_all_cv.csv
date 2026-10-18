@@ -1,0 +1,9 @@
+,,accuracy,accuracy,macro_f1,macro_f1,weighted_f1,weighted_f1
+,,mean,std,mean,std,mean,std
+model,variant,,,,,,
+logistic_regression,all,0.6508,0.0389,0.6189,0.0446,0.644,0.0394
+logistic_regression,subset,0.6481,0.0473,0.615,0.0524,0.6404,0.0477
+mlp,all,0.6386,0.03,0.6051,0.0402,0.6322,0.0346
+mlp,subset,0.6318,0.0279,0.5848,0.0362,0.6124,0.0352
+random_forest,all,0.6644,0.0432,0.629,0.0481,0.6544,0.0423
+random_forest,subset,0.6658,0.0452,0.6358,0.0488,0.6592,0.0439

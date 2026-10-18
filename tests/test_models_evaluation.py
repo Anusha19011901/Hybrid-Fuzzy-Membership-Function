@@ -69,3 +69,15 @@ def test_mlp_baseline_is_seeded_and_early_stopping(split):
     mlp = a.named_steps["model"]
     assert mlp.hidden_layer_sizes == (32, 16) and mlp.early_stopping
     assert mlp.n_iter_ < mlp.max_iter
+
+
+def test_pipeline_attribute_subset(split):
+    Xtr, ytr, Xte, yte, *_ = split
+    pipe = make_pipeline(make_baselines()["logistic_regression"], attributes=["age", "cp", "thal"]).fit(Xtr, ytr)
+    cols = list(pipe.named_steps["pre"].get_feature_names_out())
+    assert cols == ["age", "cp_asymptomatic", "cp_atypical angina", "cp_non-anginal", "cp_typical angina",
+                    "thal_fixed defect", "thal_normal", "thal_reversable defect"]
+    assert set(pipe.predict(Xte)) <= set(config.RISK_LEVELS)
+    # categorical-only subset: no numeric branch at all
+    pipe = make_pipeline(make_baselines()["logistic_regression"], attributes=["sex", "exang"]).fit(Xtr, ytr)
+    assert list(pipe.named_steps["pre"].get_feature_names_out()) == ["sex_Male", "exang_True"]

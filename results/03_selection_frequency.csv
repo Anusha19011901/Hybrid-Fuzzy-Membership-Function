@@ -1,0 +1,14 @@
+,frequency
+age,1.0
+thalch,1.0
+ca,1.0
+cp,1.0
+slope,1.0
+thal,1.0
+trestbps,0.9
+oldpeak,0.9
+restecg,0.9
+exang,0.8
+chol,0.2
+sex,0.2
+fbs,0.0

@@ -1,0 +1,20 @@
+{
+  "fitness_setup_s": 0.07,
+  "bbso_total_s": 81.2,
+  "unique_masks_evaluated": 2720,
+  "fitness_calls": 5460,
+  "evaluation_s": 8.1,
+  "chosen_subset": [
+    "age",
+    "trestbps",
+    "thalch",
+    "oldpeak",
+    "ca",
+    "cp",
+    "restecg",
+    "exang",
+    "slope",
+    "thal"
+  ],
+  "chosen_by": "modal best mask (7 of 10 seeds)"
+}
