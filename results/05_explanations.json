@@ -17,6 +17,7 @@
     "attributes": [
       {
         "attribute": "age",
+        "antecedents": 1,
         "value": 51.0,
         "missing": false,
         "fired_terms": {
@@ -39,6 +40,7 @@
       },
       {
         "attribute": "trestbps",
+        "antecedents": 1,
         "value": 140.0,
         "missing": false,
         "fired_terms": {
@@ -61,6 +63,7 @@
       },
       {
         "attribute": "thalch",
+        "antecedents": 1,
         "value": 122.0,
         "missing": false,
         "fired_terms": {
@@ -83,6 +86,7 @@
       },
       {
         "attribute": "oldpeak",
+        "antecedents": 1,
         "value": 4.2,
         "missing": false,
         "fired_terms": {
@@ -105,6 +109,7 @@
       },
       {
         "attribute": "ca",
+        "antecedents": 1,
         "value": 3.0,
         "missing": false,
         "fired_terms": {
@@ -125,6 +130,7 @@
       },
       {
         "attribute": "cp",
+        "antecedents": 1,
         "value": "asymptomatic",
         "missing": false,
         "fired_terms": {
@@ -145,6 +151,7 @@
       },
       {
         "attribute": "restecg",
+        "antecedents": 1,
         "value": "normal",
         "missing": false,
         "fired_terms": {
@@ -165,6 +172,7 @@
       },
       {
         "attribute": "exang",
+        "antecedents": 1,
         "value": "True",
         "missing": false,
         "fired_terms": {
@@ -185,6 +193,7 @@
       },
       {
         "attribute": "slope",
+        "antecedents": 1,
         "value": "flat",
         "missing": false,
         "fired_terms": {
@@ -205,6 +214,7 @@
       },
       {
         "attribute": "thal",
+        "antecedents": 1,
         "value": "reversable defect",
         "missing": false,
         "fired_terms": {
@@ -243,6 +253,7 @@
     "attributes": [
       {
         "attribute": "age",
+        "antecedents": 1,
         "value": 60.0,
         "missing": false,
         "fired_terms": {
@@ -265,6 +276,7 @@
       },
       {
         "attribute": "trestbps",
+        "antecedents": 1,
         "value": 142.0,
         "missing": false,
         "fired_terms": {
@@ -287,6 +299,7 @@
       },
       {
         "attribute": "thalch",
+        "antecedents": 1,
         "value": 110.0,
         "missing": false,
         "fired_terms": {
@@ -309,6 +322,7 @@
       },
       {
         "attribute": "oldpeak",
+        "antecedents": 1,
         "value": 2.5,
         "missing": false,
         "fired_terms": {
@@ -331,6 +345,7 @@
       },
       {
         "attribute": "ca",
+        "antecedents": 1,
         "value": null,
         "missing": true,
         "fired_terms": {},
@@ -341,6 +356,7 @@
       },
       {
         "attribute": "cp",
+        "antecedents": 1,
         "value": "asymptomatic",
         "missing": false,
         "fired_terms": {
@@ -361,6 +377,7 @@
       },
       {
         "attribute": "restecg",
+        "antecedents": 1,
         "value": "normal",
         "missing": false,
         "fired_terms": {
@@ -381,6 +398,7 @@
       },
       {
         "attribute": "exang",
+        "antecedents": 1,
         "value": "True",
         "missing": false,
         "fired_terms": {
@@ -401,6 +419,7 @@
       },
       {
         "attribute": "slope",
+        "antecedents": 1,
         "value": "flat",
         "missing": false,
         "fired_terms": {
@@ -421,6 +440,7 @@
       },
       {
         "attribute": "thal",
+        "antecedents": 1,
         "value": null,
         "missing": true,
         "fired_terms": {},

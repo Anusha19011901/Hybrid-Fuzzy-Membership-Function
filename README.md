@@ -1,14 +1,21 @@
 # Hybrid Fuzzy Membership Model for Cardiac State Prediction
 
-A clean, open reimplementation of the method described in **Indian Patent No. 601763**,
-*System and Method for Predicting a State of a Heart Using a Hybrid Fuzzy Membership Model*
-(Application 202441004228, filed 19 January 2024, granted 8 September 2026; applicant Vellore
-Institute of Technology; inventors Siva Shanmugam G, Anbarasi M, Anusha Seshadri, Iyashi Pal).
+**What this is.** A from-scratch Python reimplementation of the cardiac risk prediction method
+in **Indian Patent No. 601763** (*System and Method for Predicting a State of a Heart Using a
+Hybrid Fuzzy Membership Model*, Vellore Institute of Technology; the author of this repository is
+one of the four inventors), built on the public UCI Heart Disease dataset with every design
+decision written down. The method selects clinical attributes with Binary Brain Storm
+Optimization, fuzzifies them with hybrid trapezoid-plus-Gaussian membership functions, applies a
+learned rule base and defuzzifies by centre of gravity into one risk score. Headline result: the
+fuzzy model reaches a cross-validated macro F1 of 0.58 against 0.63 for a random forest under the
+same protocol, and in exchange every prediction is a readable account of which clinical findings
+fired which rules. The original research code was not preserved, so this is the method rebuilt
+from the granted specification, not a copy of the original experiments, and its numbers are its own.
 
-The original research code was not preserved, so this repository rebuilds the pipeline from the
-granted specification, on the public UCI Heart Disease dataset, with every design decision written
-down. It is a faithful reimplementation of the patented *method*, not a copy of the original
-experiments, and the numbers it produces are its own.
+![one patient, explained](figures/05_explain_patient_complete.png)
+
+Patent details: application 202441004228, filed 19 January 2024, granted 8 September 2026;
+inventors Siva Shanmugam G, Anbarasi M, Anusha Seshadri, Iyashi Pal.
 
 **Tags:** Healthcare AI · Fuzzy Logic · Explainable AI · Feature Selection · Metaheuristics · Python
 
@@ -37,7 +44,7 @@ handles the imprecision of clinical data while remaining readable by a clinician
 
 ```
 data/                heart_disease_uci.csv (raw); processed/ is regenerated and git-ignored
-figures/             all figures, numbered by phase
+figures/             all figures, numbered by phase; portfolio/ holds web-sized copies of the key ones
 notebooks/           one walkthrough notebook per phase
 results/             metric tables (CSV), numbered by phase
 scripts/             one runnable script per phase
@@ -58,16 +65,23 @@ python scripts/phase3_bbso.py         # ~90 s; writes results/03_* and figures/0
 python scripts/phase4_membership.py   # writes results/04_*.csv and figures/04_*.png
 python scripts/phase5_fuzzy_inference.py  # ~15 s; writes results/05_* and figures/05_*.png
 python scripts/phase6_final.py            # ~60 s; every model, bootstrap CIs, per-hospital view
+python scripts/make_portfolio_figures.py  # web-sized copies of the key figures in figures/portfolio/
 ```
+
+Versions are pinned in `requirements.txt` to those the results were produced with (Python 3.11);
+`pyproject.toml` carries looser ranges. The membership functions are plain NumPy, so no fuzzy-logic
+library is needed. Every script is deterministic for the fixed seed; running them all takes about
+four minutes on a laptop.
 
 ## Data
 
 The patent does not name its dataset, but its sample counts (919 rows for the fuzzy model and a
 184-row test set for the deep-learning baseline) match the
 [UCI Heart Disease dataset](https://archive.ics.uci.edu/dataset/45/heart+disease)
-(Janosi, Steinbrunn, Pfisterer, Detrano): 920 patients from Cleveland, Hungary, Switzerland and
-VA Long Beach, 13 clinical attributes, and a target `num` from 0 (no significant narrowing) to 4.
-The CSV in `data/` is the Kaggle mirror of that dataset.
+(Janosi, Steinbrunn, Pfisterer, Detrano; CC BY 4.0): 920 patients from Cleveland, Hungary,
+Switzerland and VA Long Beach, 13 clinical attributes, and a target `num` from 0 (no significant
+narrowing) to 4. The CSV in `data/` is the Kaggle mirror of that dataset; full credit is in the
+section at the end.
 
 Two facts about this data shape everything downstream:
 
@@ -376,14 +390,23 @@ Ideas worth running, not yet done:
   three attributes dropped and compare the per-hospital breakdown, to measure how much of their
   selection and predictive value rests on that imputation.
 
-## Patent
+## Patent, license and credits
 
-- Indian Patent No. 601763, publication IN601763 B1, granted 8 September 2026
-- IPC: G06N20/10, G06F18/2337, G06F18/26, G16H10/60, G16H50/30, A61B5/02, G06N5/048
-- Claims 1–8 (claim 1: method; claim 6: system)
+**Patent.** The method implemented here is the subject of Indian Patent No. 601763 (publication
+IN601763 B1; application 202441004228; filed 19 January 2024; granted 8 September 2026; IPC
+G06N20/10, G06F18/2337, G06F18/26, G16H10/60, G16H50/30, A61B5/02, G06N5/048; claims 1–8, claim 1
+a method and claim 6 a system). The patent is owned by **Vellore Institute of Technology**,
+Vellore, Tamil Nadu, India. Inventors: Siva Shanmugam G, Anbarasi M, Anusha Seshadri, Iyashi Pal.
 
-## License
+**This code.** This repository is an independent reimplementation of the patented method, written
+by one of the inventors for educational and research purposes. It is not the original research
+code and not a product. Whatever license the code is released under covers the code only: **it
+does not grant any rights under the patent**, which remain with Vellore Institute of Technology.
 
-Code in this repository is released under the MIT License. The patent itself is owned by Vellore
-Institute of Technology; this reimplementation is published by one of the inventors for research
-and educational use.
+**License.** TODO: choose and add a `LICENSE` file (for example MIT or Apache-2.0 for the code,
+with the patent note above kept in the README).
+
+**Dataset.** Janosi, A., Steinbrunn, W., Pfisterer, M., and Detrano, R. (1989). *Heart Disease*.
+UCI Machine Learning Repository, https://archive.ics.uci.edu/dataset/45/heart+disease
+(DOI 10.24432/C52P4X). Licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
+The copy in `data/heart_disease_uci.csv` is the Kaggle mirror of the combined four-hospital file.

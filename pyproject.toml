@@ -8,19 +8,19 @@ version = "0.1.0"
 description = "Reimplementation of a patented hybrid fuzzy membership model for cardiac state prediction"
 readme = "README.md"
 requires-python = ">=3.10"
-license = { text = "MIT" }
+# license: TODO, see README "Patent, license and credits"
 authors = [{ name = "Anusha Seshadri" }]
 dependencies = [
-    "numpy>=1.24",
+    "numpy>=1.24,<2",
     "pandas>=2.0",
-    "scikit-learn>=1.3",
-    "scikit-fuzzy>=0.4",
+    "scipy>=1.10",
+    "scikit-learn>=1.3,<1.6",
     "matplotlib>=3.7",
 ]
 
 [project.optional-dependencies]
 keras = ["tensorflow>=2.13"]  # only for hfm.keras_optional
-dev = ["pytest>=7", "jupyter", "nbconvert"]
+dev = ["pytest>=7", "nbformat", "nbconvert", "ipykernel"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
