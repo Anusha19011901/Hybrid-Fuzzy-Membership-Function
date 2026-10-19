@@ -15,7 +15,7 @@ from the granted specification, not a copy of the original experiments, and its 
 ![one patient, explained](figures/05_explain_patient_complete.png)
 
 Patent details: application 202441004228, filed 19 January 2024, granted 8 September 2026;
-inventors Siva Shanmugam G, Anbarasi M, Anusha Seshadri, Iyashi Pal.
+inventors: Anusha Seshadri, Iyashi Pal, Anbarasi Masilamani and Siva Shanmugam G.
 
 **Tags:** Healthcare AI · Fuzzy Logic · Explainable AI · Feature Selection · Metaheuristics · Python
 
